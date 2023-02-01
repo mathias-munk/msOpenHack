@@ -21,7 +21,7 @@ metadata:
   name: poi
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: poi
@@ -62,8 +62,8 @@ spec:
             - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: '0.5G'
             limits:
               cpu: '256'
               memory: 11400G
@@ -74,7 +74,7 @@ metadata:
   name: trips
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: trips
@@ -115,8 +115,8 @@ spec:
             - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: '0.5G'
             limits:
               cpu: '256'
               memory: 11400G
@@ -127,7 +127,7 @@ metadata:
   name: userprofile
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1 
   selector:
     matchLabels:
       app: userprofile
@@ -180,7 +180,7 @@ metadata:
   name: user-java
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: user-java
@@ -221,8 +221,8 @@ spec:
             - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: '0.5G'
             limits:
               cpu: '256'
               memory: 11400G
@@ -233,7 +233,7 @@ metadata:
   name: tripviewer
   namespace: web
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tripviewer
@@ -256,8 +256,8 @@ spec:
             - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: '0.5G'
             limits:
               cpu: '256'
               memory: 11400G
@@ -286,7 +286,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 8080
+      port: 80
       protocol: TCP
   selector:
     app: poi
@@ -300,7 +300,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 8080
+      port: 80
       protocol: TCP
   selector:
     app: trips
@@ -314,7 +314,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 8080
+      port: 80
       protocol: TCP
   selector:
     app: userprofile
@@ -328,7 +328,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 8080
+      port: 80
       protocol: TCP
   selector:
     app: user-java
