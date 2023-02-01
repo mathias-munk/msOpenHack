@@ -232,9 +232,9 @@ spec:
           image: registrybro8635.azurecr.io/bro_team/tripviewer:latest
           env:
             - name: TRIPS_API_ENDPOINT
-              value: http://10.0.125.239:80
+              value: http://trip-service.bro:80
             - name: USERPROFILE_API_ENDPOINT
-              value: http://10.0.162.88:80
+              value: http://userprofile-service.bro:80
           ports:
             - containerPort: 80
           resources:
@@ -270,7 +270,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 80
+      port: 8080
       protocol: TCP
   selector:
     app: poi
@@ -285,7 +285,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 80
+      port: 8080
       protocol: TCP
   selector:
     app: trip
@@ -300,7 +300,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 80
+      port: 8080
       protocol: TCP
   selector:
     app: trip
@@ -315,7 +315,7 @@ spec:
   ports:
     - targetPort: 80
       name: port80
-      port: 80
+      port: 8080
       protocol: TCP
   selector:
     app: user-java
