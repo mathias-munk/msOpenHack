@@ -108,6 +108,58 @@ spec:
               cpu: '256'
               memory: 11400G
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userprofile
+  namespace: bro
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: userprofile
+  template:
+    metadata:
+      labels:
+        app: userprofile
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: userprofile
+          image: registrybro8635.azurecr.io/bro_team/userprofile:latest
+          env:
+            - name: SQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: username
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig 
+                  key: password
+            - name: SQL_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: server
+            - name: SQL_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: database
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: '200m'
+              memory: 1G
+            limits:
+              cpu: '256'
+              memory: 11400G
+
+---
 apiVersion: v1
 kind: Service
 metadata:
