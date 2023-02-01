@@ -236,13 +236,13 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       containers:
-        - name: trips
+        - name: tripviewer
           image: registrybro8635.azurecr.io/bro_team/tripviewer:latest
           env:
             - name: TRIPS_API_ENDPOINT
-              value: http://10.0.125.239:80
+              value: http://trips-service.bro:80
             - name: USERPROFILE_API_ENDPOINT
-              value: http://10.0.162.88:80
+              value: http://userprofile-service.bro:80
           ports:
             - containerPort: 80
           resources:
@@ -274,7 +274,6 @@ metadata:
   name: poi-service
   namespace: bro
 spec:
-  type: LoadBalancer
   ports:
     - targetPort: 80
       name: port80
@@ -286,17 +285,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: trip-service
+  name: trips-service
   namespace: bro
 spec:
-  type: LoadBalancer
   ports:
     - targetPort: 80
       name: port80
       port: 80
       protocol: TCP
   selector:
-    app: trip
+    app: trips
 ---
 apiVersion: v1
 kind: Service
@@ -304,14 +302,13 @@ metadata:
   name: userprofile-service
   namespace: bro
 spec:
-  type: LoadBalancer
   ports:
     - targetPort: 80
       name: port80
       port: 80
       protocol: TCP
   selector:
-    app: trip
+    app: userprofile
 ---
 apiVersion: v1
 kind: Service
@@ -319,7 +316,6 @@ metadata:
   name: user-java-service
   namespace: bro
 spec:
-  type: LoadBalancer
   ports:
     - targetPort: 80
       name: port80
