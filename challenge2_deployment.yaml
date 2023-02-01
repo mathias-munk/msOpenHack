@@ -218,6 +218,56 @@ spec:
               cpu: '256'
               memory: 11400G
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripviewer
+  namespace: bro
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tripviewer
+  template:
+    metadata:
+      labels:
+        app: tripviewer
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: trips
+          image: registrybro8635.azurecr.io/bro_team/tripviewer:latest
+          env:
+            - name: TRIPS_API_ENDPOINT
+              value: http://10.0.125.239:80
+            - name: USERPROFILE_API_ENDPOINT
+              value: http://10.0.162.88:80
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: '500m'
+              memory: 1G
+            limits:
+              cpu: '256'
+              memory: 11400G
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripviewer-service
+  namespace: bro
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 80
+      protocol: TCP
+  selector:
+    app: tripviewer
+---
 apiVersion: v1
 kind: Service
 metadata:
