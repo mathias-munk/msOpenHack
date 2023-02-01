@@ -193,7 +193,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: userprofile
+  name: userprofile-service
   namespace: bro
 spec:
   type: LoadBalancer
