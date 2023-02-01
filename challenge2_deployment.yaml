@@ -232,9 +232,9 @@ spec:
           image: registrybro8635.azurecr.io/bro_team/tripviewer:latest
           env:
             - name: TRIPS_API_ENDPOINT
-              value: trips.bno
+              value: http://10.0.125.239:80
             - name: USERPROFILE_API_ENDPOINT
-              value: userprofile.bro
+              value: http://10.0.162.88:80
           ports:
             - containerPort: 80
           resources:
