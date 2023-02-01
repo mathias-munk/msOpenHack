@@ -1,0 +1,32 @@
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: web-api-read-access-rolebinding
+  namespace: api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: api-read
+subjects:
+- kind: Group
+  namespace: api
+  #name: groupObjectId
+  name: "90ca0dba-0c74-49f6-a79e-fd519f577083"  
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: api-read
+  namespace: api
+  rules:          # Authorization rules for this role
+  - apiGroups:  # 1st API group
+      - ''      # An empty string designates the core API group.
+    resources:
+      - services
+      - pods
+      - logs
+    verbs:
+      - get
+      - list
+---

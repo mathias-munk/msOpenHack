@@ -1,0 +1,71 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripviewer-service
+  namespace: web
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 80
+      protocol: TCP
+  selector:
+    app: tripviewer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poi-service
+  namespace: api
+spec:
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 8080
+      protocol: TCP
+  selector:
+    app: poi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trips-service
+  namespace: api
+spec:
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 8080
+      protocol: TCP
+  selector:
+    app: trips
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: userprofile-service
+  namespace: api
+spec:
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 8080
+      protocol: TCP
+  selector:
+    app: userprofile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-java-service
+  namespace: api
+spec:
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 8080
+      protocol: TCP
+  selector:
+    app: user-java

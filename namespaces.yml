@@ -1,0 +1,17 @@
+# Two namespaces - one for web, one for API
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: web
+spec:
+  finalizers:
+    - kubernetes
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api
+spec:
+  finalizers:
+    - kubernetes
+---
