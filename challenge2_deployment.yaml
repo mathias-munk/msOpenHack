@@ -27,6 +27,8 @@ spec:
         - name: poi
           image: registrybro8635.azurecr.io/bro_team/poi:latest
           env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
             - name: SQL_USER
               valueFrom:
                 secretKeyRef:
@@ -78,6 +80,8 @@ spec:
         - name: trips
           image: registrybro8635.azurecr.io/bro_team/trips:latest
           env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
             - name: SQL_USER
               valueFrom:
                 secretKeyRef:
@@ -129,6 +133,8 @@ spec:
         - name: userprofile
           image: registrybro8635.azurecr.io/bro_team/userprofile:latest
           env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
             - name: SQL_USER
               valueFrom:
                 secretKeyRef:
@@ -180,6 +186,8 @@ spec:
         - name: user-java
           image: registrybro8635.azurecr.io/bro_team/user-java:latest
           env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
             - name: SQL_USER
               valueFrom:
                 secretKeyRef:
