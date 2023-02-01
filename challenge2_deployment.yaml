@@ -57,11 +57,62 @@ spec:
               cpu: '256'
               memory: 11400G
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trips
+  namespace: bro
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: trips
+  template:
+    metadata:
+      labels:
+        app: trips
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: trips
+          image: registrybro8635.azurecr.io/bro_team/trips:latest
+          env:
+            - name: SQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: username
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig 
+                  key: password
+            - name: SQL_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: server
+            - name: SQL_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: database
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: '500m'
+              memory: 1G
+            limits:
+              cpu: '256'
+              memory: 11400G
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: poi-service
-  namespace: default-1675178595762
+  namespace: bro
 spec:
   type: LoadBalancer
   ports:
@@ -73,14 +124,16 @@ spec:
     app: poi
 ---
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: mssqlconfig
+  name: trip-service
   namespace: bro
-type: Opaque
-data:
-# all of the below need to be encoded in base64
-  username: 
-  password: 
-  server: 
-  database: 
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 80
+      protocol: TCP
+  selector:
+    app: trip
