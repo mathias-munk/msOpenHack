@@ -1,7 +1,16 @@
+# Two namespaces - one for web, one for API
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: bro
+  name: web-dev
+spec:
+  finalizers:
+    - kubernetes
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api-dev
 spec:
   finalizers:
     - kubernetes
@@ -10,7 +19,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: poi
-  namespace: bro
+  namespace: api-dev
 spec:
   replicas: 2
   selector:
@@ -63,7 +72,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: trips
-  namespace: bro
+  namespace: api-dev
 spec:
   replicas: 2
   selector:
@@ -116,7 +125,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: userprofile
-  namespace: bro
+  namespace: api-dev
 spec:
   replicas: 2
   selector:
@@ -169,7 +178,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-java
-  namespace: bro
+  namespace: api-dev
 spec:
   replicas: 2
   selector:
@@ -222,7 +231,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tripviewer
-  namespace: bro
+  namespace: web-dev
 spec:
   replicas: 2
   selector:
@@ -240,9 +249,9 @@ spec:
           image: registrybro8635.azurecr.io/bro_team/tripviewer:latest
           env:
             - name: TRIPS_API_ENDPOINT
-              value: http://trips-service.bro:80
+              value: http://trips-service.api-dev:80
             - name: USERPROFILE_API_ENDPOINT
-              value: http://userprofile-service.bro:80
+              value: http://userprofile-service.api-dev:80
           ports:
             - containerPort: 80
           resources:
@@ -257,7 +266,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tripviewer-service
-  namespace: bro
+  namespace: web-dev
 spec:
   type: LoadBalancer
   ports:
@@ -272,7 +281,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: poi-service
-  namespace: bro
+  namespace: api-dev
 spec:
   ports:
     - targetPort: 80
@@ -286,7 +295,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: trips-service
-  namespace: bro
+  namespace: api-dev
 spec:
   ports:
     - targetPort: 80
@@ -300,7 +309,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: userprofile-service
-  namespace: bro
+  namespace: api-dev
 spec:
   ports:
     - targetPort: 80
@@ -314,7 +323,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: user-java-service
-  namespace: bro
+  namespace: api-dev
 spec:
   ports:
     - targetPort: 80
