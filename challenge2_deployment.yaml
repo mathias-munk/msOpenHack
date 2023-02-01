@@ -158,7 +158,57 @@ spec:
             limits:
               cpu: '256'
               memory: 11400G
-
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-java
+  namespace: bro
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-java
+  template:
+    metadata:
+      labels:
+        app: user-java
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: user-java
+          image: registrybro8635.azurecr.io/bro_team/user-java:latest
+          env:
+            - name: SQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: username
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig 
+                  key: password
+            - name: SQL_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: server
+            - name: SQL_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlconfig
+                  key: database
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: '500m'
+              memory: 1G
+            limits:
+              cpu: '256'
+              memory: 11400G
 ---
 apiVersion: v1
 kind: Service
@@ -204,4 +254,18 @@ spec:
       protocol: TCP
   selector:
     app: trip
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-java-service
+  namespace: bro
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 80
+      protocol: TCP
+  selector:
+    app: user-java
