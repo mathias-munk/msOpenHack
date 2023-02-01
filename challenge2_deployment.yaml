@@ -189,3 +189,19 @@ spec:
       protocol: TCP
   selector:
     app: trip
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: userprofile
+  namespace: bro
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: 80
+      name: port80
+      port: 80
+      protocol: TCP
+  selector:
+    app: trip
+
