@@ -1,0 +1,14 @@
+API Write on API
+az role assignment create --role "Azure Kubernetes Service RBAC Admin" --assignee hacker2i89@msftopenhack6823ops.onmicrosoft.com --scope $AKS_ID/namespaces/api
+
+API Read on Web
+
+az role assignment create --role "Azure Kubernetes Service RBAC Reader" --assignee hacker2i89@msftopenhack6823ops.onmicrosoft.com --scope $AKS_ID/namespaces/web
+
+Web Read on API
+
+az role assignment create --role "Azure Kubernetes Service RBAC Reader" --assignee webdev@msftopenhack6823ops.onmicrosoft.com --scope $AKS_ID/namespaces/api
+
+Web Write on Web
+
+az role assignment create --role "Azure Kubernetes Service RBAC Admin" --assignee webdev@msftopenhack6823ops.onmicrosoft.com --scope $AKS_ID/namespaces/web
