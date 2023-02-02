@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: trip-viewer-web
+  namespace: api
+spec:
+  type: ExternalName
+  externalName: tripviewer-service.web.svc.cluster.local
+  ports:
+  - port: 80
