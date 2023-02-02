@@ -4,7 +4,7 @@ metadata:
   name: poi
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: poi
@@ -18,38 +18,26 @@ spec:
       containers:
         - name: poi
           image: registrybro8635.azurecr.io/bro_team/poi:latest
-          env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: Development
-            - name: SQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: username
-            - name: SQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig 
-                  key: password
-            - name: SQL_SERVER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: server
-            - name: SQL_DBNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: database
-          ports:
-            - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: 0.5G
             limits:
               cpu: '256'
               memory: 11400G
+          ports:
+            - containerPort: 80
+          volumeMounts:
+          - name: secrets-store01-inline
+            mountPath: "/secrets"
+            readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kvname-user-msi"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -57,7 +45,7 @@ metadata:
   name: trips
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: trips
@@ -71,38 +59,26 @@ spec:
       containers:
         - name: trips
           image: registrybro8635.azurecr.io/bro_team/trips:latest
-          env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: Development
-            - name: SQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: username
-            - name: SQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig 
-                  key: password
-            - name: SQL_SERVER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: server
-            - name: SQL_DBNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: database
           ports:
             - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: 0.5G
             limits:
               cpu: '256'
               memory: 11400G
+          volumeMounts:
+          - name: secrets-store01-inline
+            mountPath: "/secrets"
+            readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kvname-user-msi"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -110,7 +86,7 @@ metadata:
   name: userprofile
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: userprofile
@@ -124,38 +100,26 @@ spec:
       containers:
         - name: userprofile
           image: registrybro8635.azurecr.io/bro_team/userprofile:latest
-          env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: Development
-            - name: SQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: username
-            - name: SQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig 
-                  key: password
-            - name: SQL_SERVER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: server
-            - name: SQL_DBNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: database
           ports:
             - containerPort: 80
           resources:
             requests:
               cpu: '200m'
-              memory: 1G
+              memory: 0.5G
             limits:
               cpu: '256'
               memory: 11400G
+          volumeMounts:
+          - name: secrets-store01-inline
+            mountPath: "/secrets"
+            readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kvname-user-msi"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -163,7 +127,7 @@ metadata:
   name: user-java
   namespace: api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: user-java
@@ -177,38 +141,26 @@ spec:
       containers:
         - name: user-java
           image: registrybro8635.azurecr.io/bro_team/user-java:latest
-          env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: Development
-            - name: SQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: username
-            - name: SQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig 
-                  key: password
-            - name: SQL_SERVER
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: server
-            - name: SQL_DBNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mssqlconfig
-                  key: database
           ports:
             - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: 0.5G
             limits:
               cpu: '256'
               memory: 11400G
+          volumeMounts:
+          - name: secrets-store01-inline
+            mountPath: "/secrets"
+            readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kvname-user-msi"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -216,7 +168,7 @@ metadata:
   name: tripviewer
   namespace: web
 spec:
-  replicas: 2
+  replicas: 1 
   selector:
     matchLabels:
       app: tripviewer
@@ -239,9 +191,8 @@ spec:
             - containerPort: 80
           resources:
             requests:
-              cpu: '500m'
-              memory: 1G
+              cpu: '200m'
+              memory: 0.5G
             limits:
               cpu: '256'
               memory: 11400G
----

@@ -1,72 +1,118 @@
+$aks_cluster_name = "kubernetesbro8635"
+$resource_group = "teamResources"
+$acr_registry_name = "registrybro8635"
+$location = "northeurope"
+$keyvault_name = "keyvaultbro8635"
+$tenant_id = (az account tenant list --query "[].tenantId" -o tsv)
+
+# create the cluster
+#az aks create -n $aks_cluster_name -g $resource_group --generate-ssh-keys --attach-acr $acr_registry_name --uptime-sla --node-count 3 --enable-cluster-auto-upgrade
+# Enable the keyvault addon for AKS
+az aks enable-addons --addons azure-keyvault-secrets-provider --name $aks_cluster_name --resource-group $resource_group
+$identity_client_id = az aks show -g $resource_group -n $aks_cluster_name --query addonProfiles.azureKeyvaultSecretsProvider.identity.clientId -o tsv
+
+# Create the keyvault
+az keyvault create -n $keyvault_name -g $resource_group -l $location
+# Assign the secrets
+az keyvault secret set --vault-name $keyvault_name -n "SQLUSER" --value "sqladminbRo8635"
+az keyvault secret set --vault-name $keyvault_name -n "" --value ""
+az keyvault secret set --vault-name $keyvault_name -n "SQLSERVER" --value ""
+az keyvault secret set --vault-name $keyvault_name -n "SQLDBNAME" --value  ""
+
+# set policy to access keys in your key vault
+az keyvault set-policy -n $keyvault_name --key-permissions get --spn $identity_client_id
+# set policy to access secrets in your key vault
+az keyvault set-policy -n $keyvault_name --secret-permissions get --spn $identity_client_id
+# set policy to access certs in your key vault
+az keyvault set-policy -n $keyvault_name --certificate-permissions get --spn $identity_client_id
 
 
-# Networking and SQL configs
-$NETWORK_NAME = ""
-$SQL_SERVER_PASSWORD = ""
-$SQL_SERVER = ""
+$secret_provider_class = @"
+# This is a SecretProviderClass example using user-assigned identity to access your key vault
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: azure-kvname-user-msi
+  namespace: api
+spec:
+  provider: azure
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "true"                  # Set to true for using managed identity
+    userAssignedIdentityID: $identity_client_id   # Set the clientID of the user-assigned managed identity to use
+    keyvaultName: $keyvault_name          # Set to the name of your key vault
+    cloudName: ""                         # [OPTIONAL for Azure] if not provided, the Azure environment defaults to AzurePublicCloud
+    objects:  |
+      array:
+        - |
+          objectName: SQLDBNAME
+          objectType: secret              # object types: secret, key, or cert
+          objectVersion: ""               # [OPTIONAL] object versions, default to latest if empty
+          objectAlias: SQL_DBNAME               
+        - |
+          objectName: SQLPASSWORD
+          objectType: secret              # object types: secret, key, or cert
+          objectVersion: ""               # [OPTIONAL] object versions, default to latest if empty
+          objectAlias: SQL_PASSWORD               
+        - |
+          objectName: SQLSERVER
+          objectType: secret              # object types: secret, key, or cert
+          objectVersion: ""               # [OPTIONAL] object versions, default to latest if empty
+          objectAlias: SQL_SERVER               
+        - |
+          objectName: SQLUSER
+          objectType: secret              # object types: secret, key, or cert
+          objectVersion: ""               # [OPTIONAL] object versions, default to latest if empty
+          objectAlias: SQL_USER               
+    tenantId: $tenant_id                 # The tenant ID of the key vault
+"@
 
-# ACR Creds
-$ACR_USN = ""
-$ACR_PWD = ""
-$ACR_URL = ""
-
-
-# Pull the image hosting the sql server
-docker pull mcr.microsoft.com/mssql/server:2017-latest
-
-# Clone the repo containing all of the source 
-git clone https://github.com/Microsoft-OpenHack/containers_artifacts.git
-
-cp ./containers_artifacts/dockerfiles/Dockerfile_0 ./containers_artifacts/src/user-java/Dockerfile
-cp ./containers_artifacts/dockerfiles/Dockerfile_1 ./containers_artifacts/src/tripviewer/Dockerfile
-cp ./containers_artifacts/dockerfiles/Dockerfile_2 ./containers_artifacts/src/userprofile/Dockerfile
-cp ./containers_artifacts/dockerfiles/Dockerfile_3 ./containers_artifacts/src/poi/Dockerfile
-cp ./containers_artifacts/dockerfiles/Dockerfile_4 ./containers_artifacts/src/trips/Dockerfile
-
-docker build ./containers_artifacts/src/user-java/ -t user-java:latest
-docker build ./containers_artifacts/src/tripviewer/ -t tripviewer:latest
-docker build ./containers_artifacts/src/userprofile/ -t userprofile:latest
-docker build ./containers_artifacts/src/poi/ -t poi:latest
-docker build ./containers_artifacts/src/trips/ -t trips:latest
-
-# Create a shared network
-docker network create $NETWORK_NAME
-# Make a MSSQL Server on port 1433
-docker run --network $NETWORK_NAME --name $SQL_SERVER -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=$SQL_SERVER_PASSWORD" -p 1433:1433 -d mcr.microsoft.com/mssql/server:latest
-
-# Create config to make required database
-docker exec $SQL_SERVER /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SQL_SERVER_PASSWORD -q "CREATE DATABASE mydrivingDB" -j
-
-
-# Authenticate against azure ACR
-docker login $ACR_URL -u $ACR_USN -p $ACR_PWD
-# Pull data loader from azure ACR
-docker pull $ACR_URL/dataload:1.0
-
-# RUn the data loader container to populate the database
-docker run --network $NETWORK_NAME -e SQLFQDN=mssql_server -e SQLUSER=sa -e SQLPASS=Password123! -e SQLDB=mydrivingDB registrybro8635.azurecr.io/dataload:1.0
-
-# Spin up the POI API 
-docker run --network $NETWORK_NAME -d -p 8080:80 --name poi -e "SQL_PASSWORD=$SQL_SERVER_PASSWORD" -e "SQL_SERVER=$SQL_SERVER" -e "SQL_USER=sa" -e "ASPNETCORE_ENVIRONMENT=Local" poi:latest
-
-# Check it's available
-(invoke-webrequest 'http://localhost:8080/api/poi/healthcheck').content
+$secret_provider_class_file = ".\secretproviderclass.yaml"
+$secret_provider_class | Out-File $secret_provider_class_file
+kubectl apply -f $secret_provider_class_file
 
 
-$images_to_upload = @(
-    "user-java",
-    "tripviewer",
-    "userprofile",
-    "poi",
-    "trips"
-)
+$pod_name = "busybox-secrets-store-inline-user-msi"
+$example_yaml = @"
+# This is a sample pod definition for using SecretProviderClass and the user-assigned identity to access your key vault
+kind: Pod
+apiVersion: v1
+metadata:
+  name: $pod_name
+spec:
+  containers:
+    - name: busybox
+      image: k8s.gcr.io/e2e-test-images/busybox:1.29-1
+      command:
+        - "/bin/sleep"
+        - "10000"
+      volumeMounts:
+      - name: secrets-store01-inline
+        mountPath: "/mnt/secrets-store"
+        readOnly: true
+  volumes:
+    - name: secrets-store01-inline
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: "azure-kvname-user-msi"
+"@
+$example_yaml_path = ".\example_deployment_for_secret.yaml"
+$example_yaml | Out-File $example_yaml_path
+kubectl apply -f $example_yaml_path
 
-foreach ($image_name in $images_to_upload) {
-    # Tag all of the build containers with an alias to the ACR instance
-    $i = $image_name + ":latest"
-    docker tag $i registrybro8635.azurecr.io/bro_team/$image_name
-    # Push all of the tagged containers to the actual ACR instance 
-    docker push registrybro8635.azurecr.io/bro_team/$image_name
+function test_secret_access {
+    param(
+        $pod_name,
+        $namespace
+    )
+    ## show secrets held in secrets-store
+    kubectl  exec -n $namespace $pod_name -- ls /mnt/secretks-store/ 
+    ## print a test secret 'ExampleSecret' held in secrets-store
+    kubectl  exec -n $namespace $pod_name -- cat /mnt/secrets-store/SQLUSER
+    Write-Host
 }
 
+test_secret_access -pod_name $pod_name -namespace "default"
 
